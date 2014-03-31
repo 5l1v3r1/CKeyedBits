@@ -15,13 +15,13 @@ bool kb_buff_read_header(kb_buff_t * kb, kb_header_t * header);
 /**
  * Reads a NULL-terminated string from the KeyedBits buffer and copies it out
  * to a specified buffer.
- * @param out The output buffer
- * @param max The length of the output buffer. This includes the byte used for
- * NULL termination.
- * @return false if the buffer ended before a NULL byte; false if more than
- * max characters are utilized by the string; true otherwise.
+ * @param out An output pointer which will point to the string once it is
+ * verified to be properly NULL-terminated.
+ * @param len Will contain the length of the string (not including NULL,
+ * terminator), provided the function returns `true`.
+ * @return false if the buffer ended before a NULL byte, true otherwise.
  */
-bool kb_buff_read_string(kb_buff_t * kb, char * out, uint64_t max);
+bool kb_buff_read_string(kb_buff_t * kb, const char ** out, uint64_t * len);
 
 /**
  * Reads a double value as a UTF-8 string and parses it.
@@ -38,19 +38,19 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out);
  * @param out The output value
  * @return false on buffer underflow or invalid lenLen field; true otherwise.
  */
-bool kb_buff_read_int(kb_buff_t * kb, uint8_t lenLen, uint64_t * out);
+bool kb_buff_read_int(kb_buff_t * kb, uint8_t lenLen, int64_t * out);
 
 /**
  * Reads a data object from the buffer.
  * @param lenLen The lenLen field of the object's header.
- * @param out The output buffer
+ * @param start Set to the initial address in the internal buffer of the
  * @param max The maximum length the buffer may have.
  * @return false on buffer underflow OR overflow; true otherwise.
  */
 bool kb_buff_read_data(kb_buff_t * kb,
                        uint8_t lenLen,
-                       void * out,
-                       uint64_t max);
+                       const void ** start,
+                       uint64_t * len);
 
 /**
  * Reads an ASCII dictionary key from the buffer.
