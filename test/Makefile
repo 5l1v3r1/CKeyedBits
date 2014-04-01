@@ -1,4 +1,4 @@
-CFILES=test_buff_decoder.c
+CFILES=test_buff_decoder.c test_buff_encoder.c
 
 lib: build ../build
 	for file in $(CFILES); do \
