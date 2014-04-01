@@ -17,7 +17,7 @@ bool kb_buff_read_header(kb_buff_t * kb, kb_header_t * header) {
 
 bool kb_buff_read_string(kb_buff_t * kb, const char ** out, uint64_t * len) {
   uint64_t i;
-  (*out) = kb->buff;
+  (*out) = kb->buff + kb->off;
   for (i = 0; kb->off < kb->len; i++) {
     const char ch = *((const char *)(kb->buff + kb->off));
     kb->off++;
@@ -89,7 +89,7 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out) {
 bool kb_buff_read_int(kb_buff_t * kb, uint8_t lenLen, int64_t * out) {
   // For now, I am making the assumption that you are on an x86 or a different
   // system that uses little endian (i.e. not ARM, probably)
-  // 
+  
   if (lenLen == 1) {
     // 32-bit integer
     if (kb->off + 4 > kb->len) return false;
@@ -125,7 +125,7 @@ bool kb_buff_read_data(kb_buff_t * kb,
     len = *((const uint32_t *)(kb->buff + kb->off));
   }
   
-  (*start) = kb->buff + lenLen + 1;
+  (*start) = kb->buff + kb->off + lenLen + 1;
   kb->off += lenLen + 1;
   if (len + kb->off > kb->len) return false;
   kb->off += len;
