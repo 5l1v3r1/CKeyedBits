@@ -12,7 +12,7 @@ typedef struct {
  * For encoding/decoding in a fixed-size buffer.
  */
 typedef struct {
-  const void * buff;
+  void * buff;
   uint64_t len;
   uint64_t off;
 } __attribute__((packed)) kb_buff_t;

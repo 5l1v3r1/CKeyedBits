@@ -1,4 +1,4 @@
-CFILES=src/buff_decoder.c
+CFILES=src/buff_decoder.c src/buff_encoder.c
 override INCLUDES += -I./include
 
 lib: build
