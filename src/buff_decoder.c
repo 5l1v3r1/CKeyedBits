@@ -63,7 +63,8 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out) {
   }
   
   // check if the string ended properly
-  if (string[i] == '.' || string[i] == '-') return false;
+  if (i == 0) return false;
+  if (string[i - 1] == '.' || string[i - 1] == '-') return false;
   if (string[i] != 'e') {
     (*out) = value * (negative ? -1.0 : 1.0);
     return true;
@@ -171,7 +172,8 @@ static bool _parse_int(const char * buff, int * number) {
       return false;
     }
   }
-  
+
+  if (i == 0) return false;
   if (buff[i] == '-' || buff[i] == '+') return false;
   (*number) = value * (negative ? -1 : 1);
   return true;

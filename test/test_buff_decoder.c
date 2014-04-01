@@ -9,6 +9,7 @@ void test_decode_string();
 void test_decode_double();
 
 static void _test_double(const char * str, double value);
+static void _test_inval_double(const char * str);
 
 int main() {
   test_decode_int();
@@ -94,6 +95,13 @@ void test_decode_double() {
   _test_double("31.415e-1", 3.1415);
   _test_double("-2.1e+10", -21000000000.0);
   _test_double("-3e-2", -0.03);
+  _test_inval_double("-");
+  _test_inval_double("-3.");
+  _test_inval_double("3.");
+  _test_inval_double("3.22e");
+  _test_inval_double("3.2e-+1");
+  _test_inval_double("3.2e1-1");
+  _test_inval_double("e1");
 }
 
 static void _test_double(const char * str, double value) {
@@ -117,3 +125,22 @@ static void _test_double(const char * str, double value) {
   
   printf(" passed!\n");
 }
+
+static void _test_inval_double(const char * str) {
+  printf("testing (invalid) double %s...", str);
+  char ptr[64];
+  sprintf(ptr, "\x87%s", str);
+  kb_buff_t buff;
+  kb_header_t header;
+  kb_buff_initialize_decode(&buff, (void *)ptr, strlen(str) + 2);
+  bool result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 7);
+  assert(header.nullTerm);
+  
+  double d;
+  result = kb_buff_read_double(&buff, &d);
+  assert(!result);
+  printf(" passed!\n");
+}
+
