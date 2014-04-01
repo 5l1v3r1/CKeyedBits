@@ -15,4 +15,4 @@ typedef struct {
   const void * buff;
   uint64_t len;
   uint64_t off;
-} kb_buff_t;
+} __attribute__((packed)) kb_buff_t;
