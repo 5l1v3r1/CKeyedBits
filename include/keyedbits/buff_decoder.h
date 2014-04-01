@@ -26,8 +26,7 @@ bool kb_buff_read_string(kb_buff_t * kb, const char ** out, uint64_t * len);
 /**
  * Reads a double value as a UTF-8 string and parses it.
  * @return false on general buffer underflow; false if the input is not a
- * valid double value; false if the string exceeds 64 bytes in storage; true
- * otherwise.
+ * valid double value; true otherwise.
  */
 bool kb_buff_read_double(kb_buff_t * kb, double * out);
 

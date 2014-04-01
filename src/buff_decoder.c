@@ -37,7 +37,7 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out) {
   double value = 0;
   bool negative = false;
   bool decimal = false;
-  double decScale = 1;
+  double decScale = 0.1;
   uint64_t i;
   
   // parse the string before the possible exponent
@@ -64,7 +64,10 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out) {
   
   // check if the string ended properly
   if (string[i] == '.' || string[i] == '-') return false;
-  if (string[i] != 'e') return true;
+  if (string[i] != 'e') {
+    (*out) = value * (negative ? -1.0 : 1.0);
+    return true;
+  }
   
   // read the exponent
   int exponent = 0;
@@ -77,13 +80,14 @@ bool kb_buff_read_double(kb_buff_t * kb, double * out) {
   
   while (exponent) {
     if (exponent & 1) multiple *= product;
-    product *= 10.0;
+    product *= product;
     exponent >>= 1;
   }
   
   if (negExp) multiple = 1.0 / multiple;
   
-  return value * (negative ? -1.0 : 1.0) * multiple;
+  (*out) = value * (negative ? -1.0 : 1.0) * multiple;
+  return true;
 }
 
 bool kb_buff_read_int(kb_buff_t * kb, uint8_t lenLen, int64_t * out) {
@@ -169,6 +173,6 @@ static bool _parse_int(const char * buff, int * number) {
   }
   
   if (buff[i] == '-' || buff[i] == '+') return false;
-  (*number) = value;
+  (*number) = value * (negative ? -1 : 1);
   return true;
 }
