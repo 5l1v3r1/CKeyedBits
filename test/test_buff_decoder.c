@@ -7,6 +7,7 @@
 void test_decode_int();
 void test_decode_string();
 void test_decode_double();
+void test_decode_data();
 
 static void _test_double(const char * str, double value);
 static void _test_inval_double(const char * str);
@@ -102,6 +103,15 @@ void test_decode_double() {
   _test_inval_double("3.2e-+1");
   _test_inval_double("3.2e1-1");
   _test_inval_double("e1");
+}
+
+void test_decode_data() {
+  const char * buff1 = "\x05\x03" "hey";
+  const char * buff2 = "\x25\x03\x00" "hey";
+  const char * buff3 = "\x45\x03\x00\x00" "hey";
+  const char * buff4 = "\x65\x03\x00\x00\x00" "hey";
+
+  // TODO: here, try to decode all of those buffers as "hey"
 }
 
 static void _test_double(const char * str, double value) {
