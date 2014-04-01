@@ -8,14 +8,21 @@ void test_decode_int();
 void test_decode_string();
 void test_decode_double();
 void test_decode_data();
+void test_decode_array();
+void test_decode_dictionary();
 
 static void _test_double(const char * str, double value);
 static void _test_inval_double(const char * str);
+static void _verify_hey_data(const void * buffer, uint64_t len);
+static void _verify_data_overflow(const void * buffer, uint64_t len);
 
 int main() {
   test_decode_int();
   test_decode_string();
   test_decode_double();
+  test_decode_data();
+  test_decode_array();
+  test_decode_dictionary();
   return 0;
 }
 
@@ -111,7 +118,73 @@ void test_decode_data() {
   const char * buff3 = "\x45\x03\x00\x00" "hey";
   const char * buff4 = "\x65\x03\x00\x00\x00" "hey";
 
-  // TODO: here, try to decode all of those buffers as "hey"
+  _verify_hey_data(buff1, 5);
+  _verify_hey_data(buff2, 6);
+  _verify_hey_data(buff3, 7);
+  _verify_hey_data(buff4, 8);
+  
+  _verify_data_overflow(buff1, 4);
+  _verify_data_overflow(buff2, 5);
+  _verify_data_overflow(buff3, 6);
+  _verify_data_overflow(buff4, 7);
+}
+
+void test_decode_array() {
+  printf("testing arrays (sort of)...");
+  // encoded form of [null, new Buffer("hey"), 3.14]
+  const char * buffer = "\x82\x04\x05\x03" "hey" "\x87" "3.14\x00\x00";
+  
+  kb_buff_t buff;
+  kb_header_t header;
+  
+  kb_buff_initialize_decode(&buff, (void *)buffer, 14);
+  bool result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 2);
+  assert(header.nullTerm);
+  
+  // NOTE: for now, there's not much more testing I can do, since reading an
+  // array is as simple as reading the objects *in* the array
+  printf(" passed!\n");
+}
+
+void test_decode_dictionary() {
+  printf("testing dictionary decode...");
+  const char * buffer = "\x83" "nam\xe5" "\x81" "alex\x00\x00";
+  kb_buff_t buff;
+  kb_header_t header;
+  
+  kb_buff_initialize_decode(&buff, (void *)buffer, 12);
+  bool result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 3);
+  assert(header.nullTerm);
+  
+  char key[64];
+  result = kb_buff_read_key(&buff, key, 64);
+  assert(result);
+  assert(!strcmp(key, "name"));
+  
+  result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 1);
+  assert(header.nullTerm);
+  
+  const char * nameStr = NULL;
+  uint64_t len;
+  result = kb_buff_read_string(&buff, &nameStr, &len);
+  assert(result);
+  assert(len == 4);
+  assert(!strcmp(nameStr, "alex"));
+  
+  result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 0);
+  
+  result = kb_buff_read_header(&buff, &header);
+  assert(!result);
+  
+  printf(" passed!\n");
 }
 
 static void _test_double(const char * str, double value) {
@@ -133,6 +206,9 @@ static void _test_double(const char * str, double value) {
   assert(result);
   assert(fabs(d - value) < fabs(value / 100000000.0));
   
+  result = kb_buff_read_header(&buff, &header);
+  assert(!result);
+  
   printf(" passed!\n");
 }
 
@@ -151,6 +227,50 @@ static void _test_inval_double(const char * str) {
   double d;
   result = kb_buff_read_double(&buff, &d);
   assert(!result);
+  
   printf(" passed!\n");
 }
 
+static void _verify_hey_data(const void * buffer, uint64_t len) {
+  printf("verifying data of length 0x%llx...", len);
+  kb_buff_t buff;
+  kb_header_t header;
+  kb_buff_initialize_decode(&buff, (void *)buffer, len);
+  bool result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 5);
+  
+  uint8_t * ptr;
+  uint64_t theLen;
+  result = kb_buff_read_data(&buff,
+                             header.lenLen,
+                             (const void **)&ptr,
+                             &theLen);
+  assert(result);
+  assert(theLen == 3);
+  assert(ptr[0] == 'h' && ptr[1] == 'e' && ptr[2] == 'y');
+    
+  result = kb_buff_read_header(&buff, &header);
+  assert(!result);
+  
+  printf(" passed!\n");
+}
+
+static void _verify_data_overflow(const void * buffer, uint64_t len) {
+  printf("verifying data overflow of len 0x%llx...", len);
+  kb_buff_t buff;
+  kb_header_t header;
+  kb_buff_initialize_decode(&buff, (void *)buffer, len);
+  bool result = kb_buff_read_header(&buff, &header);
+  assert(result);
+  assert(header.typeField == 5);
+  
+  uint8_t * ptr;
+  uint64_t theLen;
+  result = kb_buff_read_data(&buff,
+                             header.lenLen,
+                             (const void **)&ptr,
+                             &theLen);
+  assert(!result);
+  printf(" passed!\n");
+}

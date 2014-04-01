@@ -124,8 +124,8 @@ bool kb_buff_read_data(kb_buff_t * kb,
     len = (uint32_t) *((const uint16_t *)(kb->buff + kb->off));
   } else if (lenLen == 2) {
     len = (uint32_t) *((const uint16_t *)(kb->buff + kb->off));
-    uint8_t next = *((const uint8_t *)(kb->buff + kb->off));
-    len += ((uint32_t)next) << 0x10;
+    uint8_t next = *((const uint8_t *)(kb->buff + kb->off + 2));
+    len |= ((uint32_t)next) << 0x10;
   } else if (lenLen == 3) {
     len = *((const uint32_t *)(kb->buff + kb->off));
   }
