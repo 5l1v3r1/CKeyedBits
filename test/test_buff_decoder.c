@@ -177,9 +177,9 @@ void test_decode_dictionary() {
   assert(len == 4);
   assert(!strcmp(nameStr, "alex"));
   
-  result = kb_buff_read_header(&buff, &header);
+  result = kb_buff_read_key(&buff, key, 64);
   assert(result);
-  assert(header.typeField == 0);
+  assert(key[0] == 0);
   
   result = kb_buff_read_header(&buff, &header);
   assert(!result);

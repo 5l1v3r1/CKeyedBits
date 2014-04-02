@@ -8,7 +8,7 @@ int main() {
   
   uint64_t i;
   for (i = 0; i < sizeof(valid); i++) {
-    bool res = kb_buff_validate_header((kb_header_t *)&valid[i]);
+    bool res = kb_validate_header((kb_header_t *)&valid[i]);
     assert(res);
   }
   

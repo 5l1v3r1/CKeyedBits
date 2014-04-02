@@ -1,6 +1,6 @@
 #include <keyedbits/validation.h>
 
-bool kb_buff_validate_header(kb_header_t * header) {
+bool kb_validate_header(kb_header_t * header) {
   if (header->reserved != 0) return false;
   switch (header->typeField) {
     case KeyedBitsTypeTerminator:
