@@ -4,10 +4,12 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 void test_encode_int();
 void test_encode_string();
 void test_encode_double();
+void test_encode_data();
 
 static void _test_double_v1(double d);
 
@@ -15,6 +17,7 @@ int main() {
   test_encode_int();
   test_encode_string();
   test_encode_double();
+  test_encode_data();
   return 0;
 }
 
@@ -94,6 +97,63 @@ void test_encode_double() {
   _test_double_v1(2.0);
   _test_double_v1(-2.0);
   _test_double_v1(-0.3);
+}
+
+void test_encode_data() {
+  printf("testing data encode... ");
+  
+  char * buffer = (char *)malloc(0x1000005);
+  kb_buff_t buff;
+  
+  bzero(buffer, 5);
+  
+  kb_buff_initialize_encode(&buff, buffer, 5);
+  bool result = kb_buff_write_data(&buff, "hey", 3);
+  assert(result);
+  assert(buff.off == 5);
+  assert(buffer[0] == 5);
+  assert(buffer[1] == 3);
+  assert(buffer[2] == 'h');
+  assert(buffer[3] == 'e');
+  assert(buffer[4] == 'y');
+  
+  bzero(buffer, 0x103);
+  
+  kb_buff_initialize_encode(&buff, buffer, 0x103);
+  result = kb_buff_write_data(&buff, buffer, 0x100);
+  assert(result);
+  assert(buff.off == 0x103);
+  assert(buffer[0] == 0x25);
+  assert(buffer[1] == 0);
+  assert(buffer[2] == 1);
+  
+  bzero(buffer, 0x10004);
+  
+  kb_buff_initialize_encode(&buff, buffer, 0x10004);
+  result = kb_buff_write_data(&buff, buffer, 0x10000);
+  assert(result);
+  assert(buff.off == 0x10004);
+  assert(buffer[0] == 0x45);
+  assert(buffer[1] == 0);
+  assert(buffer[2] == 0);
+  assert(buffer[3] == 1);
+  assert(buffer[4] == 0x45);
+  
+  bzero(buffer, 0x1000005);
+  
+  kb_buff_initialize_encode(&buff, buffer, 0x1000005);
+  result = kb_buff_write_data(&buff, buffer, 0x1000000);
+  assert(result);
+  assert(buff.off == 0x1000005);
+  assert(buffer[0] == 0x65);
+  assert(buffer[1] == 0);
+  assert(buffer[2] == 0);
+  assert(buffer[3] == 0);
+  assert(buffer[4] == 1);
+  assert(buffer[5] == 0x65);
+  
+  free(buffer);
+  printf(" passed!\n");
 }
 
 static void _test_double_v1(double d) {
