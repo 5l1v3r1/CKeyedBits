@@ -1,3 +1,6 @@
+#ifndef __KEYEDBITS_BUFF_DECODER_H__
+#define __KEYEDBITS_BUFF_DECODER_H__
+
 #include "types.h"
 
 /**
@@ -60,3 +63,5 @@ bool kb_buff_read_data(kb_buff_t * kb,
  * @return true if a key or dictionary terminator is read; false otherwise.
  */
 bool kb_buff_read_key(kb_buff_t * kb, char * out, uint64_t max);
+
+#endif

@@ -47,6 +47,7 @@ bool kb_buff_write_double_v1(kb_buff_t * kb, double d) {
   uint64_t topPart = (uint64_t)(d < 0 ? -d : d);
   uint64_t bottomPart = (uint64_t)(((d < 0 ? -d : d) - (double)topPart)
     * 10000000000.0);
+  while (!(bottomPart % 10) && bottomPart) bottomPart /= 10;
   
   // generate the string
   int res = _read_dec_string(result, 63, topPart);
@@ -148,16 +149,25 @@ bool kb_buff_write_key(kb_buff_t * kb, const char * key) {
 }
 
 static int _read_dec_string(char * output, uint64_t max, uint64_t dec) {
+  if (max < 2) return -1;
+  if (dec == 0) {
+    output[0] = '0';
+    output[1] = 0;
+    return 1;
+  }
+  
   int i, len;
-  for (len = 0; len < max - 1; len++) {
-    uint64_t digit = dec & 10;
+  for (len = 0; len + 1 < max; len++) {
+    if (!dec) break;
+    uint64_t digit = dec % 10;
     dec /= 10;
-    for (i = 0; i < len; i++) {
-      output[i + 1] = output[i];
+    for (i = len; i > 0; i--) {
+      output[i] = output[i - 1];
     }
-    output[0] = '0' + (char)dec;
+    output[0] = '0' + (char)digit;
   }
   if (dec) return -1;
   output[len] = 0;
+  
   return len;
 }

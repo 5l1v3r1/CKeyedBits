@@ -1,3 +1,6 @@
+#ifndef __KEYEDBITS_TYPES_H__
+#define __KEYEDBITS_TYPES_H__
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -16,3 +19,5 @@ typedef struct {
   uint64_t len;
   uint64_t off;
 } __attribute__((packed)) kb_buff_t;
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef __KEYEDBITS_BUFF_ENCODER_H__
+#define __KEYEDBITS_BUFF_ENCODER_H__
+
 #include <keyedbits/types.h>
 
 /**
@@ -46,3 +49,5 @@ bool kb_buff_write_data(kb_buff_t * kb, const void * buff, uint32_t len);
  * @return false on buffer overflow; false if the key is not valid ASCII.
  */
 bool kb_buff_write_key(kb_buff_t * kb, const char * key);
+
+#endif

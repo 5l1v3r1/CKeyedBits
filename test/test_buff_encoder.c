@@ -1,11 +1,20 @@
 #include <keyedbits/buff_encoder.h>
+#include <keyedbits/buff_decoder.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
+#include <math.h>
 
 void test_encode_int();
+void test_encode_string();
+void test_encode_double();
+
+static void _test_double_v1(double d);
 
 int main() {
   test_encode_int();
+  test_encode_string();
+  test_encode_double();
   return 0;
 }
 
@@ -55,5 +64,59 @@ void test_encode_int() {
   assert(buffer[0] == 0xA6);
   assert(*((uint32_t *)(buffer + 1)) == 0xFFFFEDCCL);
   
+  printf(" passed!\n");
+}
+
+void test_encode_string() {
+  printf("testing encode string...");
+  
+  uint8_t buffer[5];
+  kb_buff_t buff;
+  
+  kb_buff_initialize_encode(&buff, buffer, 5);
+  bool result = kb_buff_write_string(&buff, "hey");
+  assert(result);
+  assert(buffer[0] == 0x81);
+  assert(!strcmp((char *)&buffer[1], "hey"));
+  
+  kb_buff_initialize_encode(&buff, buffer, 5);
+  result = kb_buff_write_string(&buff, "heya");
+  assert(!result);
+  
+  printf(" passed!\n");
+}
+
+void test_encode_double() {
+  _test_double_v1(123.123);
+  _test_double_v1(3.141592);
+  _test_double_v1(0.123);
+  _test_double_v1(-3.141592);
+  _test_double_v1(2.0);
+  _test_double_v1(-2.0);
+  _test_double_v1(-0.3);
+}
+
+static void _test_double_v1(double d) {
+  printf("testing KB v1 double %lf...", d);
+  uint8_t buffer[128];
+  kb_buff_t buff;
+  
+  // set buffer to all 1's so it's not gonna give a fake NULL-termination
+  uint64_t i;
+  for (i = 0; i < 128; i++) {
+    buffer[i] = 0xff;
+  }
+  
+  kb_buff_initialize_encode(&buff, buffer, 128);
+  bool result = kb_buff_write_double_v1(&buff, d);
+  assert(result);
+  assert(buffer[0] == 0x87);
+  
+  kb_buff_initialize_decode(&buff, buffer + 1, buff.off - 1);
+  double readD;
+  result = kb_buff_read_double(&buff, &readD);
+  assert(result);
+  
+  assert(fabs(readD - d) < fabs(d / 100000.0));
   printf(" passed!\n");
 }
