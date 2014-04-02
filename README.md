@@ -12,3 +12,10 @@ Let `buffer` be your input buffer of KeyedBits data, and `len` be its length. Se
 
     kb_buff_t kb;
     kb_buff_initialize_decode(&kb, buffer, len);
+
+All of the decoding functions from here on out return a `bool` which will be `true` if the requested data was successfully decoded. First, to read an object header, do the following:
+
+    kb_header_t head;
+    bool success = kb_buff_read_header(&kb, &head);
+    if (!success) // fail
+    if (!kb_validate_)
