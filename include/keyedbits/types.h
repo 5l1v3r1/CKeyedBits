@@ -20,4 +20,15 @@ typedef struct {
   uint64_t off;
 } __attribute__((packed)) kb_buff_t;
 
+typedef enum {
+  KeyedBitsTypeTerminator = 0,
+  KeyedBitsTypeString = 1,
+  KeyedBitsTypeArray = 2,
+  KeyedBitsTypeDictionary = 3,
+  KeyedBitsTypeNull = 4,
+  KeyedBitsTypeData = 5,
+  KeyedBitsTypeInteger = 6,
+  KeyedBitsTypeFloat = 7
+} KeyedBitsType;
+
 #endif
