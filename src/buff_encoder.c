@@ -1,6 +1,7 @@
 #include <keyedbits/buff_encoder.h>
 
 static int _read_dec_string(char * output, uint64_t max, uint64_t dec);
+static bool _write_byte(kb_buff_t * kb, uint8_t byte);
 
 void kb_buff_initialize_encode(kb_buff_t * kb, void * buff, uint64_t len) {
   kb->buff = buff;
@@ -148,6 +149,22 @@ bool kb_buff_write_key(kb_buff_t * kb, const char * key) {
   return false;
 }
 
+bool kb_buffer_write_null(kb_buff_t * kb) {
+  return _write_byte(kb, 0x04);
+}
+
+bool kb_buff_write_array(kb_buff_t * kb) {
+  return _write_byte(kb, 0x82);
+}
+
+bool kb_buff_write_dict(kb_buff_t * kb) {
+  return _write_byte(kb, 0x83);
+}
+
+bool kb_buff_write_terminator(kb_buff_t * kb) {
+  return _write_byte(kb, 0);
+}
+
 static int _read_dec_string(char * output, uint64_t max, uint64_t dec) {
   if (max < 2) return -1;
   if (dec == 0) {
@@ -170,4 +187,11 @@ static int _read_dec_string(char * output, uint64_t max, uint64_t dec) {
   output[len] = 0;
   
   return len;
+}
+
+static bool _write_byte(kb_buff_t * kb, uint8_t byte) {
+  if (kb->off >= kb->len) return false;
+  *((uint8_t *)(kb->buff + kb->off)) = byte;
+  kb->off++;
+  return true;
 }

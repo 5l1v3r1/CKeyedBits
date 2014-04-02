@@ -50,4 +50,28 @@ bool kb_buff_write_data(kb_buff_t * kb, const void * buff, uint32_t len);
  */
 bool kb_buff_write_key(kb_buff_t * kb, const char * key);
 
+/**
+ * Write a single-byte `null` object.
+ * @return false on buffer overflow.
+ */
+bool kb_buffer_write_null(kb_buff_t * kb);
+
+/**
+ * Write the single-byte array header to the buffer.
+ * @return false on buffer overflow.
+ */
+bool kb_buff_write_array(kb_buff_t * kb);
+
+/**
+ * Write the single-byte dictionary header to the buffer.
+ * @return false on buffer overflow.
+ */
+bool kb_buff_write_dict(kb_buff_t * kb);
+
+/**
+ * Write a single 0 byte to the buffer.
+ * @return false on buffer overflow.
+ */
+bool kb_buff_write_terminator(kb_buff_t * kb);
+
 #endif

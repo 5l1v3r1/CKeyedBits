@@ -10,6 +10,7 @@ void test_encode_int();
 void test_encode_string();
 void test_encode_double();
 void test_encode_data();
+void test_encode_key();
 
 static void _test_double_v1(double d);
 
@@ -18,6 +19,7 @@ int main() {
   test_encode_string();
   test_encode_double();
   test_encode_data();
+  test_encode_key();
   return 0;
 }
 
@@ -152,7 +154,48 @@ void test_encode_data() {
   assert(buffer[4] == 1);
   assert(buffer[5] == 0x65);
   
+  // make sure it doesn't allow overflow 8
+  kb_buff_initialize_encode(&buff, buffer, 2);
+  result = kb_buff_write_data(&buff, buffer, 1);
+  assert(!result);
+  
+  // make sure it doesn't allow overflow 16
+  kb_buff_initialize_encode(&buff, buffer, 0x102);
+  result = kb_buff_write_data(&buff, buffer, 0x100);
+  assert(!result);
+  
+  // make sure it doesn't allow overflow 24
+  kb_buff_initialize_encode(&buff, buffer, 0x10003);
+  result = kb_buff_write_data(&buff, buffer, 0x10000);
+  assert(!result);
+  
+  // make sure it doesn't allow overflow 32
+  kb_buff_initialize_encode(&buff, buffer, 0x1000004);
+  result = kb_buff_write_data(&buff, buffer, 0x1000000);
+  assert(!result);
+  
   free(buffer);
+  printf(" passed!\n");
+}
+
+void test_encode_key() {
+  printf("testing encode key...");
+  
+  uint8_t buffer[4];
+  kb_buff_t buff;
+  
+  kb_buff_initialize_encode(&buff, buffer, 4);
+  bool result = kb_buff_write_key(&buff, "name");
+  assert(result);
+  assert(buffer[0] == 'n');
+  assert(buffer[1] == 'a');
+  assert(buffer[2] == 'm');
+  assert(buffer[3] == ('e' | 0x80));
+  
+  kb_buff_initialize_encode(&buff, buffer, 3);
+  result = kb_buff_write_key(&buff, "name");
+  assert(!result);
+  
   printf(" passed!\n");
 }
 
